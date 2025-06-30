@@ -1,0 +1,6 @@
+@HidroSense_HostAddress = http://localhost:5114
+
+GET {{HidroSense_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

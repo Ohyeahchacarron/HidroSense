@@ -1,6 +1,4 @@
-﻿namespace HidroSense.Models;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -11,6 +9,15 @@ public class Usuario
 
     [Required]
     public string Nombre { get; set; }
+
+    [Required]
+    public string ApellidoPaterno { get; set; }
+
+    public string ApellidoMaterno { get; set; }
+
+    public int Edad { get; set; }
+
+    public string Pais { get; set; }
 
     [Required]
     public string Correo { get; set; }
@@ -56,8 +63,4 @@ public class Usuario
         var bytes = Encoding.UTF8.GetBytes(tokenPlano);
         return Convert.ToBase64String(sha256.ComputeHash(bytes));
     }
-
-
 }
-
-

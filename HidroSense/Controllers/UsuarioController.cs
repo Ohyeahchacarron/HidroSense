@@ -93,6 +93,10 @@ public class UsuariosController : ControllerBase
         }
 
         usuarioObjetivo.Nombre = datos.Nombre;
+        usuarioObjetivo.ApellidoPaterno = datos.ApellidoPaterno;
+        usuarioObjetivo.ApellidoMaterno = datos.ApellidoMaterno;
+        usuarioObjetivo.Edad = datos.Edad;
+        usuarioObjetivo.Pais = datos.Pais;
         usuarioObjetivo.Telefono = datos.Telefono;
         usuarioObjetivo.Nivel = datos.Nivel;
 
@@ -122,14 +126,9 @@ public class UsuariosController : ControllerBase
         if (usuarioObjetivo == null)
             return NotFound("Usuario no encontrado.");
 
-        if (usuarioAutenticado.Nivel != "3" && usuarioAutenticado.IdUsuario != id)
-            return Forbid("No tienes permiso para eliminar este usuario.");
-
         _context.Usuarios.Remove(usuarioObjetivo);
         await _context.SaveChangesAsync();
 
         return Ok("Usuario eliminado.");
     }
-
-
 }

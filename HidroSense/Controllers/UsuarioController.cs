@@ -24,29 +24,36 @@ public class UsuariosController : ControllerBase
             return BadRequest("El correo ya está registrado.");
         }
 
+        nuevoUsuario.Nivel = "1";
         nuevoUsuario.EstablecerPassword(nuevoUsuario.PasswordHash);
+
         _context.Usuarios.Add(nuevoUsuario);
         await _context.SaveChangesAsync();
+
         return Ok("Usuario registrado correctamente.");
     }
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] Usuario usuarioLogin)
-    {
-        var usuario = await _context.Usuarios
-            .FirstOrDefaultAsync(u => u.Correo == usuarioLogin.Correo);
 
-        if (usuario == null || !usuario.VerificarPassword(usuarioLogin.PasswordHash))
+
+
+    public class CredencialesLogin
+    {
+        public string Correo { get; set; }
+        public string Password { get; set; }
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] CredencialesLogin credenciales)
+    {
+        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == credenciales.Correo);
+
+        if (usuario == null || !usuario.VerificarPassword(credenciales.Password))
         {
             return Unauthorized("Correo o contraseña incorrectos.");
         }
 
         var tokenPlano = Guid.NewGuid().ToString();
-
-        using var sha256 = SHA256.Create();
-        var hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(tokenPlano));
-        usuario.Token = Convert.ToBase64String(hash);
-
+        usuario.Token = Usuario.EncriptarToken(tokenPlano);
         await _context.SaveChangesAsync();
 
         return Ok(new
@@ -54,14 +61,17 @@ public class UsuariosController : ControllerBase
             usuario.IdUsuario,
             usuario.Nombre,
             usuario.Correo,
-            Token = tokenPlano 
+            Token = tokenPlano
         });
     }
 
     [HttpPut("editar/{id}")]
-    public async Task<IActionResult> EditarUsuario(int id, [FromBody] Usuario datosEditados, [FromQuery] string token)
+    public async Task<IActionResult> EditarUsuario(int id, [FromBody] Usuario datos)
     {
-        var tokenEncriptado = Usuario.EncriptarToken(token);
+        if (string.IsNullOrEmpty(datos.Token))
+            return BadRequest("Se requiere el token.");
+
+        var tokenEncriptado = Usuario.EncriptarToken(datos.Token);
         var usuarioAutenticado = await _context.Usuarios.FirstOrDefaultAsync(u => u.Token == tokenEncriptado);
 
         if (usuarioAutenticado == null)
@@ -74,28 +84,35 @@ public class UsuariosController : ControllerBase
         if (usuarioAutenticado.Nivel != "3" && usuarioAutenticado.IdUsuario != id)
             return Forbid("No tienes permiso para editar este usuario.");
 
-        if (usuarioObjetivo.Correo != datosEditados.Correo)
+        if (usuarioObjetivo.Correo != datos.Correo)
         {
-            bool correoExiste = await _context.Usuarios.AnyAsync(u => u.Correo == datosEditados.Correo && u.IdUsuario != id);
+            bool correoExiste = await _context.Usuarios.AnyAsync(u => u.Correo == datos.Correo && u.IdUsuario != id);
             if (correoExiste)
-                return BadRequest("El correo ya está en uso por otro usuario.");
-
-            usuarioObjetivo.Correo = datosEditados.Correo;
+                return BadRequest("El correo ya está en uso.");
+            usuarioObjetivo.Correo = datos.Correo;
         }
 
-        usuarioObjetivo.Nombre = datosEditados.Nombre;
-        usuarioObjetivo.Telefono = datosEditados.Telefono;
-        usuarioObjetivo.Nivel = datosEditados.Nivel;
+        usuarioObjetivo.Nombre = datos.Nombre;
+        usuarioObjetivo.Telefono = datos.Telefono;
+        usuarioObjetivo.Nivel = datos.Nivel;
+
+        if (!string.IsNullOrEmpty(datos.PasswordHash))
+            usuarioObjetivo.EstablecerPassword(datos.PasswordHash);
 
         await _context.SaveChangesAsync();
-
         return Ok("Usuario actualizado correctamente.");
     }
 
-    [HttpDelete("eliminar/{id}")]
-    public async Task<IActionResult> EliminarUsuario(int id, [FromQuery] string token)
+
+    public class EliminacionRequest
     {
-        var tokenEncriptado = Usuario.EncriptarToken(token);
+        public string Token { get; set; }
+    }
+
+    [HttpDelete("eliminar/{id}")]
+    public async Task<IActionResult> EliminarUsuario(int id, [FromBody] EliminacionRequest datos)
+    {
+        var tokenEncriptado = Usuario.EncriptarToken(datos.Token);
         var usuarioAutenticado = await _context.Usuarios.FirstOrDefaultAsync(u => u.Token == tokenEncriptado);
 
         if (usuarioAutenticado == null)
@@ -111,7 +128,7 @@ public class UsuariosController : ControllerBase
         _context.Usuarios.Remove(usuarioObjetivo);
         await _context.SaveChangesAsync();
 
-        return Ok("Usuario eliminado correctamente.");
+        return Ok("Usuario eliminado.");
     }
 
 

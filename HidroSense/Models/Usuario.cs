@@ -57,6 +57,7 @@ public class Usuario
         return Convert.ToBase64String(sha256.ComputeHash(bytes));
     }
 
+
 }
 
 

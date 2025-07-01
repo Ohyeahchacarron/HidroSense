@@ -3,11 +3,20 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MiPoliticaCors",
+        policy =>
+        {
+            policy.AllowAnyOrigin()  
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 
+builder.Services.AddControllers();
 builder.Services.AddDbContext<HidroSenseContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -19,10 +28,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
+app.UseCors("MiPoliticaCors");
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

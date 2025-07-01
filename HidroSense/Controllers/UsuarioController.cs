@@ -30,7 +30,10 @@ public class UsuariosController : ControllerBase
         _context.Usuarios.Add(nuevoUsuario);
         await _context.SaveChangesAsync();
 
-        return Ok("Usuario registrado correctamente.");
+        return Ok(new { 
+            status = 200,
+            message = "Usuario registrado correctamente."
+        });
     }
 
 
@@ -45,24 +48,39 @@ public class UsuariosController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] CredencialesLogin credenciales)
     {
-        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == credenciales.Correo);
 
-        if (usuario == null || !usuario.VerificarPassword(credenciales.Password))
+        try
         {
-            return Unauthorized("Correo o contraseña incorrectos.");
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == credenciales.Correo);
+
+            if (usuario == null || !usuario.VerificarPassword(credenciales.Password))
+            {
+                return Unauthorized("Correo o contraseña incorrectos.");
+            }
+
+            var tokenPlano = Guid.NewGuid().ToString();
+            usuario.Token = Usuario.EncriptarToken(tokenPlano);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                usuario.IdUsuario,
+                usuario.Nombre,
+                usuario.Correo,
+                Token = tokenPlano,
+                status = 200
+            });
         }
-
-        var tokenPlano = Guid.NewGuid().ToString();
-        usuario.Token = Usuario.EncriptarToken(tokenPlano);
-        await _context.SaveChangesAsync();
-
-        return Ok(new
-        {
-            usuario.IdUsuario,
-            usuario.Nombre,
-            usuario.Correo,
-            Token = tokenPlano
-        });
+        catch (Exception e) {
+            return StatusCode(500, 
+                new { 
+                idUsuario =  0,
+                nombre = "",
+                correo = "null",
+                token = "null",
+                status = 500});
+                }
+     
     }
 
     [HttpPut("editar/{id}")]

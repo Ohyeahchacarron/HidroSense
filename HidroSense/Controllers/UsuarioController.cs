@@ -67,6 +67,11 @@ public class UsuariosController : ControllerBase
                 usuario.IdUsuario,
                 usuario.Nombre,
                 usuario.Correo,
+                usuario.ApellidoPaterno,
+                usuario.ApellidoMaterno,
+                usuario.Telefono,
+                usuario.Edad,
+                usuario.Pais,
                 Token = tokenPlano,
                 status = 200
             });
@@ -86,21 +91,10 @@ public class UsuariosController : ControllerBase
     [HttpPut("editar/{id}")]
     public async Task<IActionResult> EditarUsuario(int id, [FromBody] Usuario datos)
     {
-        if (string.IsNullOrEmpty(datos.Token))
-            return BadRequest("Se requiere el token.");
-
-        var tokenEncriptado = Usuario.EncriptarToken(datos.Token);
-        var usuarioAutenticado = await _context.Usuarios.FirstOrDefaultAsync(u => u.Token == tokenEncriptado);
-
-        if (usuarioAutenticado == null)
-            return Unauthorized("Token inválido.");
-
+       
         var usuarioObjetivo = await _context.Usuarios.FindAsync(id);
         if (usuarioObjetivo == null)
             return NotFound("Usuario no encontrado.");
-
-        if (usuarioAutenticado.Nivel != "3" && usuarioAutenticado.IdUsuario != id)
-            return Forbid("No tienes permiso para editar este usuario.");
 
         if (usuarioObjetivo.Correo != datos.Correo)
         {
@@ -122,7 +116,13 @@ public class UsuariosController : ControllerBase
             usuarioObjetivo.EstablecerPassword(datos.PasswordHash);
 
         await _context.SaveChangesAsync();
-        return Ok("Usuario actualizado correctamente.");
+
+        return Ok(new
+        {
+          
+            status = 200,
+            message = "Usuario editado correctamente"
+        });
     }
 
 

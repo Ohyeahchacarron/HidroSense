@@ -1,28 +1,35 @@
-﻿using System.Security.Cryptography;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using HidroSense.Data;
 using HidroSense.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 [ApiController]
 [Route("api/[controller]")]
 public class UsuariosController : ControllerBase
 {
     private readonly HidroSenseContext _context;
+    private readonly IConfiguration _config;
 
-    public UsuariosController(HidroSenseContext context)
+    public UsuariosController(HidroSenseContext context, IConfiguration config)
     {
         _context = context;
+        _config = config;
     }
 
     [HttpPost("registro")]
     public async Task<IActionResult> Registrar([FromBody] Usuario nuevoUsuario)
     {
         if (await _context.Usuarios.AnyAsync(u => u.Correo == nuevoUsuario.Correo))
-        {
             return BadRequest("El correo ya está registrado.");
-        }
+
+        if (await _context.Usuarios.AnyAsync(u => u.Telefono == nuevoUsuario.Telefono))
+            return BadRequest("El teléfono ya está registrado.");
 
         nuevoUsuario.Nivel = "1";
         nuevoUsuario.EstablecerPassword(nuevoUsuario.PasswordHash);
@@ -32,9 +39,6 @@ public class UsuariosController : ControllerBase
 
         return Ok("Usuario registrado correctamente.");
     }
-
-
-
 
     public class CredencialesLogin
     {
@@ -46,43 +50,56 @@ public class UsuariosController : ControllerBase
     public async Task<IActionResult> Login([FromBody] CredencialesLogin credenciales)
     {
         var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == credenciales.Correo);
-
         if (usuario == null || !usuario.VerificarPassword(credenciales.Password))
-        {
             return Unauthorized("Correo o contraseña incorrectos.");
-        }
 
-        var tokenPlano = Guid.NewGuid().ToString();
-        usuario.Token = Usuario.EncriptarToken(tokenPlano);
-        await _context.SaveChangesAsync();
+        var token = GenerarJwt(usuario);
 
         return Ok(new
         {
             usuario.IdUsuario,
             usuario.Nombre,
             usuario.Correo,
-            Token = tokenPlano
+            Token = token
         });
     }
 
+    private string GenerarJwt(Usuario usuario)
+    {
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+            new Claim(ClaimTypes.Role, usuario.Nivel)
+        };
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(int.Parse(_config["Jwt:ExpireMinutes"])),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    [Authorize]
     [HttpPut("editar/{id}")]
     public async Task<IActionResult> EditarUsuario(int id, [FromBody] Usuario datos)
     {
-        if (string.IsNullOrEmpty(datos.Token))
-            return BadRequest("Se requiere el token.");
-
-        var tokenEncriptado = Usuario.EncriptarToken(datos.Token);
-        var usuarioAutenticado = await _context.Usuarios.FirstOrDefaultAsync(u => u.Token == tokenEncriptado);
-
-        if (usuarioAutenticado == null)
-            return Unauthorized("Token inválido.");
-
         var usuarioObjetivo = await _context.Usuarios.FindAsync(id);
         if (usuarioObjetivo == null)
             return NotFound("Usuario no encontrado.");
 
-        if (usuarioAutenticado.Nivel != "3" && usuarioAutenticado.IdUsuario != id)
-            return Forbid("No tienes permiso para editar este usuario.");
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        var userNivel = User.FindFirstValue(ClaimTypes.Role);
+
+
+        //if (userNivel != "3" && userId != id)
+        //    return Forbid("No tienes permiso para editar este usuario.");
 
         if (usuarioObjetivo.Correo != datos.Correo)
         {
@@ -107,21 +124,10 @@ public class UsuariosController : ControllerBase
         return Ok("Usuario actualizado correctamente.");
     }
 
-
-    public class EliminacionRequest
-    {
-        public string Token { get; set; }
-    }
-
+    [Authorize]
     [HttpDelete("eliminar/{id}")]
-    public async Task<IActionResult> EliminarUsuario(int id, [FromBody] EliminacionRequest datos)
+    public async Task<IActionResult> EliminarUsuario(int id)
     {
-        var tokenEncriptado = Usuario.EncriptarToken(datos.Token);
-        var usuarioAutenticado = await _context.Usuarios.FirstOrDefaultAsync(u => u.Token == tokenEncriptado);
-
-        if (usuarioAutenticado == null)
-            return Unauthorized("Token inválido.");
-
         var usuarioObjetivo = await _context.Usuarios.FindAsync(id);
         if (usuarioObjetivo == null)
             return NotFound("Usuario no encontrado.");
@@ -131,4 +137,5 @@ public class UsuariosController : ControllerBase
 
         return Ok("Usuario eliminado.");
     }
+
 }

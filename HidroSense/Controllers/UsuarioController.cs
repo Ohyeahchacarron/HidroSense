@@ -3,12 +3,13 @@ using System.Security.Claims;
 using System.Text;
 using HidroSense.Data;
 using HidroSense.Models;
+using HidroSense.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class UsuariosController : ControllerBase
@@ -22,45 +23,80 @@ public class UsuariosController : ControllerBase
         _config = config;
     }
 
+    [AllowAnonymous]
     [HttpPost("registro")]
-    public async Task<IActionResult> Registrar([FromBody] Usuario nuevoUsuario)
+    public async Task<IActionResult> Registrar([FromBody] UsuarioRegistroDTO dto)
     {
-        if (await _context.Usuarios.AnyAsync(u => u.Correo == nuevoUsuario.Correo))
-            return BadRequest("El correo ya está registrado.");
+        if (await _context.Usuarios.AnyAsync(u => u.Correo == dto.Correo))
+            return BadRequest(new { success = false, message = "El correo ya está registrado.", data = (object)null });
 
-        if (await _context.Usuarios.AnyAsync(u => u.Telefono == nuevoUsuario.Telefono))
-            return BadRequest("El teléfono ya está registrado.");
+        if (await _context.Usuarios.AnyAsync(u => u.Telefono == dto.Telefono))
+            return BadRequest(new { success = false, message = "El teléfono ya está registrado.", data = (object)null });
 
-        nuevoUsuario.Nivel = "1";
-        nuevoUsuario.EstablecerPassword(nuevoUsuario.PasswordHash);
+        var usuario = new Usuario
+        {
+            Nombre = dto.Nombre,
+            ApellidoPaterno = dto.ApellidoPaterno,
+            ApellidoMaterno = dto.ApellidoMaterno,
+            Edad = dto.Edad,
+            Pais = dto.Pais,
+            Correo = dto.Correo,
+            Telefono = dto.Telefono,
+            Nivel = "1"
+        };
 
-        _context.Usuarios.Add(nuevoUsuario);
+        usuario.EstablecerPassword(dto.Contrasenia);
+
+        _context.Usuarios.Add(usuario);
         await _context.SaveChangesAsync();
 
-        return Ok("Usuario registrado correctamente.");
+        return Ok(new
+        {
+            success = true,
+            message = "Registro exitoso, nuevo usuario",
+            data = new
+            {
+                usuario.IdUsuario,
+                usuario.Nombre,
+                usuario.ApellidoPaterno,
+                usuario.ApellidoMaterno,
+                usuario.Edad,
+                usuario.Pais,
+                usuario.Correo,
+                Contrasenia = dto.Contrasenia,
+                usuario.Telefono
+            }
+        });
     }
 
-    public class CredencialesLogin
-    {
-        public string Correo { get; set; }
-        public string Password { get; set; }
-    }
-
+    [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] CredencialesLogin credenciales)
+    public async Task<IActionResult> Login([FromBody] UsuarioLoginDTO dto)
     {
-        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == credenciales.Correo);
-        if (usuario == null || !usuario.VerificarPassword(credenciales.Password))
-            return Unauthorized("Correo o contraseña incorrectos.");
+        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Correo == dto.Correo);
+
+        if (usuario == null || !usuario.VerificarPassword(dto.Contrasenia))
+            return Unauthorized(new { success = false, message = "Correo o contraseña incorrectos.", data = (object)null });
 
         var token = GenerarJwt(usuario);
 
         return Ok(new
         {
-            usuario.IdUsuario,
-            usuario.Nombre,
-            usuario.Correo,
-            Token = token
+            success = true,
+            message = "Credenciales correctas",
+            data = new
+            {
+                token,
+                usuario.IdUsuario,
+                usuario.Nombre,
+                usuario.ApellidoPaterno,
+                usuario.ApellidoMaterno,
+                usuario.Edad,
+                usuario.Pais,
+                usuario.Correo,
+                Contrasenia = dto.Contrasenia,
+                usuario.Telefono
+            }
         });
     }
 
@@ -86,56 +122,67 @@ public class UsuariosController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    [Authorize]
     [HttpPut("editar/{id}")]
-    public async Task<IActionResult> EditarUsuario(int id, [FromBody] Usuario datos)
+    public async Task<IActionResult> EditarUsuario(int id, [FromBody] UsuarioEdicionDTO dto)
     {
-        var usuarioObjetivo = await _context.Usuarios.FindAsync(id);
-        if (usuarioObjetivo == null)
-            return NotFound("Usuario no encontrado.");
+        var usuario = await _context.Usuarios.FindAsync(id);
+        if (usuario == null)
+            return NotFound(new { success = false, message = "Usuario no encontrado.", data = (object)null });
 
-        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-        var userNivel = User.FindFirstValue(ClaimTypes.Role);
-
-
-        //if (userNivel != "3" && userId != id)
-        //    return Forbid("No tienes permiso para editar este usuario.");
-
-        if (usuarioObjetivo.Correo != datos.Correo)
+        if (usuario.Correo != dto.Correo)
         {
-            bool correoExiste = await _context.Usuarios.AnyAsync(u => u.Correo == datos.Correo && u.IdUsuario != id);
+            bool correoExiste = await _context.Usuarios.AnyAsync(u => u.Correo == dto.Correo && u.IdUsuario != id);
             if (correoExiste)
-                return BadRequest("El correo ya está en uso.");
-            usuarioObjetivo.Correo = datos.Correo;
+                return BadRequest(new { success = false, message = "El correo ya está en uso.", data = (object)null });
+
+            usuario.Correo = dto.Correo;
         }
 
-        usuarioObjetivo.Nombre = datos.Nombre;
-        usuarioObjetivo.ApellidoPaterno = datos.ApellidoPaterno;
-        usuarioObjetivo.ApellidoMaterno = datos.ApellidoMaterno;
-        usuarioObjetivo.Edad = datos.Edad;
-        usuarioObjetivo.Pais = datos.Pais;
-        usuarioObjetivo.Telefono = datos.Telefono;
-        usuarioObjetivo.Nivel = datos.Nivel;
+        usuario.Nombre = dto.Nombre;
+        usuario.ApellidoPaterno = dto.ApellidoPaterno;
+        usuario.ApellidoMaterno = dto.ApellidoMaterno;
+        usuario.Edad = dto.Edad;
+        usuario.Pais = dto.Pais;
+        usuario.Telefono = dto.Telefono;
 
-        if (!string.IsNullOrEmpty(datos.PasswordHash))
-            usuarioObjetivo.EstablecerPassword(datos.PasswordHash);
+        if (!string.IsNullOrWhiteSpace(dto.Contrasenia))
+            usuario.EstablecerPassword(dto.Contrasenia);
 
         await _context.SaveChangesAsync();
-        return Ok("Usuario actualizado correctamente.");
+
+        return Ok(new
+        {
+            success = true,
+            message = "Cambios generados",
+            data = new[]
+            {
+            new
+            {
+                usuario.IdUsuario,
+                usuario.Nombre,
+                usuario.ApellidoPaterno,
+                usuario.ApellidoMaterno,
+                usuario.Edad,
+                usuario.Pais,
+                usuario.Correo,
+                Contrasenia = dto.Contrasenia,
+                usuario.Telefono
+            }
+        }
+        });
     }
 
-    [Authorize]
+
     [HttpDelete("eliminar/{id}")]
     public async Task<IActionResult> EliminarUsuario(int id)
     {
-        var usuarioObjetivo = await _context.Usuarios.FindAsync(id);
-        if (usuarioObjetivo == null)
-            return NotFound("Usuario no encontrado.");
+        var usuario = await _context.Usuarios.FindAsync(id);
+        if (usuario == null)
+            return NotFound(new { success = false, message = "Usuario no encontrado.", data = (object)null });
 
-        _context.Usuarios.Remove(usuarioObjetivo);
+        _context.Usuarios.Remove(usuario);
         await _context.SaveChangesAsync();
 
-        return Ok("Usuario eliminado.");
+        return Ok(new { success = true, message = "Usuario eliminado.", data = (object)null });
     }
-
 }

@@ -1,6 +1,7 @@
 ﻿namespace HidroSense.Data;
-using Microsoft.EntityFrameworkCore;
 using HidroSense.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 public class HidroSenseContext : DbContext
 {
@@ -12,7 +13,8 @@ public class HidroSenseContext : DbContext
     public DbSet<FuenteAgua> FuentesAgua { get; set; }
     public DbSet<Medicion> Mediciones { get; set; }
     public DbSet<SistemaPurificacion> SistemasPurificacion { get; set; }
-    public DbSet<TratamientoAplicado> TratamientosAplicados { get; set; }
-    public DbSet<ResultadoTratamiento> ResultadosTratamiento { get; set; }
     public DbSet<Alerta> Alertas { get; set; }
+    public DbSet<ComponentesSistema> ComponentesSistema { get; set; }
+    public DbSet<Proveedor> Proveedores { get; set; }
 }
+

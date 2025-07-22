@@ -11,7 +11,6 @@ public class Medicion
     [Required]
     public int IdFuente { get; set; }
 
-    [ForeignKey("IdFuente")]
     public FuenteAgua FuenteAgua { get; set; }
 
     public DateTime FechaHora { get; set; }

@@ -26,6 +26,7 @@ public class Usuario
     [Required]
     public string PasswordHash { get; set; }
 
+    [Required]
     public string Telefono { get; set; }
 
     public DateTime FechaRegistro { get; set; } = DateTime.Now;

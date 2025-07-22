@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HidroSense.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class Tablas : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,7 +18,10 @@ namespace HidroSense.Migrations
                     IdSistema = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     NombreSistema = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NombreFabricante = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Precio = table.Column<double>(type: "float", nullable: false),
+                    UrlImagen = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,10 +35,15 @@ namespace HidroSense.Migrations
                     IdUsuario = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApellidoPaterno = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApellidoMaterno = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Edad = table.Column<int>(type: "int", nullable: false),
+                    Pais = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Correo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Telefono = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    FechaRegistro = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Nivel = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -95,6 +103,7 @@ namespace HidroSense.Migrations
                     IdMedicion = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdFuente = table.Column<int>(type: "int", nullable: false),
+                    FuenteAguaIdFuente = table.Column<int>(type: "int", nullable: false),
                     FechaHora = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Ph = table.Column<float>(type: "real", nullable: true),
                     NivelTurbidez = table.Column<float>(type: "real", nullable: true),
@@ -104,63 +113,10 @@ namespace HidroSense.Migrations
                 {
                     table.PrimaryKey("PK_Mediciones", x => x.IdMedicion);
                     table.ForeignKey(
-                        name: "FK_Mediciones_FuentesAgua_IdFuente",
-                        column: x => x.IdFuente,
+                        name: "FK_Mediciones_FuentesAgua_FuenteAguaIdFuente",
+                        column: x => x.FuenteAguaIdFuente,
                         principalTable: "FuentesAgua",
                         principalColumn: "IdFuente",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TratamientosAplicados",
-                columns: table => new
-                {
-                    IdTratamiento = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdFuente = table.Column<int>(type: "int", nullable: false),
-                    IdSistema = table.Column<int>(type: "int", nullable: false),
-                    FechaInicio = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FechaFin = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Observaciones = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TratamientosAplicados", x => x.IdTratamiento);
-                    table.ForeignKey(
-                        name: "FK_TratamientosAplicados_FuentesAgua_IdFuente",
-                        column: x => x.IdFuente,
-                        principalTable: "FuentesAgua",
-                        principalColumn: "IdFuente",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TratamientosAplicados_SistemasPurificacion_IdSistema",
-                        column: x => x.IdSistema,
-                        principalTable: "SistemasPurificacion",
-                        principalColumn: "IdSistema",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ResultadosTratamiento",
-                columns: table => new
-                {
-                    IdResultado = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdTratamiento = table.Column<int>(type: "int", nullable: false),
-                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PhFinal = table.Column<float>(type: "real", nullable: true),
-                    TurbidezFinal = table.Column<float>(type: "real", nullable: true),
-                    TemperaturaFinal = table.Column<float>(type: "real", nullable: true),
-                    Observaciones = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ResultadosTratamiento", x => x.IdResultado);
-                    table.ForeignKey(
-                        name: "FK_ResultadosTratamiento_TratamientosAplicados_IdTratamiento",
-                        column: x => x.IdTratamiento,
-                        principalTable: "TratamientosAplicados",
-                        principalColumn: "IdTratamiento",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -175,24 +131,9 @@ namespace HidroSense.Migrations
                 column: "IdUsuario");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Mediciones_IdFuente",
+                name: "IX_Mediciones_FuenteAguaIdFuente",
                 table: "Mediciones",
-                column: "IdFuente");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ResultadosTratamiento_IdTratamiento",
-                table: "ResultadosTratamiento",
-                column: "IdTratamiento");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TratamientosAplicados_IdFuente",
-                table: "TratamientosAplicados",
-                column: "IdFuente");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TratamientosAplicados_IdSistema",
-                table: "TratamientosAplicados",
-                column: "IdSistema");
+                column: "FuenteAguaIdFuente");
         }
 
         /// <inheritdoc />
@@ -205,16 +146,10 @@ namespace HidroSense.Migrations
                 name: "Mediciones");
 
             migrationBuilder.DropTable(
-                name: "ResultadosTratamiento");
-
-            migrationBuilder.DropTable(
-                name: "TratamientosAplicados");
+                name: "SistemasPurificacion");
 
             migrationBuilder.DropTable(
                 name: "FuentesAgua");
-
-            migrationBuilder.DropTable(
-                name: "SistemasPurificacion");
 
             migrationBuilder.DropTable(
                 name: "Usuarios");

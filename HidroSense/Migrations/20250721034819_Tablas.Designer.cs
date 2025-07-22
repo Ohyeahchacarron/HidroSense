@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HidroSense.Migrations
 {
     [DbContext(typeof(HidroSenseContext))]
-    [Migration("20250706194327_RemoveTokenFieldFromUsuario")]
-    partial class RemoveTokenFieldFromUsuario
+    [Migration("20250721034819_Tablas")]
+    partial class Tablas
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -101,6 +101,9 @@ namespace HidroSense.Migrations
                     b.Property<DateTime>("FechaHora")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("FuenteAguaIdFuente")
+                        .HasColumnType("int");
+
                     b.Property<int>("IdFuente")
                         .HasColumnType("int");
 
@@ -115,43 +118,9 @@ namespace HidroSense.Migrations
 
                     b.HasKey("IdMedicion");
 
-                    b.HasIndex("IdFuente");
+                    b.HasIndex("FuenteAguaIdFuente");
 
                     b.ToTable("Mediciones");
-                });
-
-            modelBuilder.Entity("HidroSense.Models.ResultadoTratamiento", b =>
-                {
-                    b.Property<int>("IdResultado")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdResultado"));
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("IdTratamiento")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Observaciones")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float?>("PhFinal")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("TemperaturaFinal")
-                        .HasColumnType("real");
-
-                    b.Property<float?>("TurbidezFinal")
-                        .HasColumnType("real");
-
-                    b.HasKey("IdResultado");
-
-                    b.HasIndex("IdTratamiento");
-
-                    b.ToTable("ResultadosTratamiento");
                 });
 
             modelBuilder.Entity("HidroSense.Models.SistemaPurificacion", b =>
@@ -166,46 +135,24 @@ namespace HidroSense.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("NombreFabricante")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("NombreSistema")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Precio")
+                        .HasColumnType("float");
+
+                    b.Property<string>("UrlImagen")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdSistema");
 
                     b.ToTable("SistemasPurificacion");
-                });
-
-            modelBuilder.Entity("HidroSense.Models.TratamientoAplicado", b =>
-                {
-                    b.Property<int>("IdTratamiento")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdTratamiento"));
-
-                    b.Property<DateTime?>("FechaFin")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaInicio")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("IdFuente")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdSistema")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Observaciones")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("IdTratamiento");
-
-                    b.HasIndex("IdFuente");
-
-                    b.HasIndex("IdSistema");
-
-                    b.ToTable("TratamientosAplicados");
                 });
 
             modelBuilder.Entity("Usuario", b =>
@@ -285,41 +232,11 @@ namespace HidroSense.Migrations
                 {
                     b.HasOne("HidroSense.Models.FuenteAgua", "FuenteAgua")
                         .WithMany()
-                        .HasForeignKey("IdFuente")
+                        .HasForeignKey("FuenteAguaIdFuente")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("FuenteAgua");
-                });
-
-            modelBuilder.Entity("HidroSense.Models.ResultadoTratamiento", b =>
-                {
-                    b.HasOne("HidroSense.Models.TratamientoAplicado", "TratamientoAplicado")
-                        .WithMany()
-                        .HasForeignKey("IdTratamiento")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TratamientoAplicado");
-                });
-
-            modelBuilder.Entity("HidroSense.Models.TratamientoAplicado", b =>
-                {
-                    b.HasOne("HidroSense.Models.FuenteAgua", "FuenteAgua")
-                        .WithMany()
-                        .HasForeignKey("IdFuente")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HidroSense.Models.SistemaPurificacion", "SistemaPurificacion")
-                        .WithMany()
-                        .HasForeignKey("IdSistema")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FuenteAgua");
-
-                    b.Navigation("SistemaPurificacion");
                 });
 #pragma warning restore 612, 618
         }

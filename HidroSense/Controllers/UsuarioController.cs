@@ -23,6 +23,19 @@ public class UsuariosController : ControllerBase
         _config = config;
     }
 
+
+
+    [HttpGet("getUsuarios")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<Usuario>>> getUsuarios() {
+
+        var usuarios = await _context.Usuarios.ToListAsync();
+
+        return Ok(usuarios);
+    }
+
+
+
     [AllowAnonymous]
     [HttpPost("registro")]
     public async Task<IActionResult> Registrar([FromBody] UsuarioRegistroDTO dto)
@@ -187,8 +200,10 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpGet("usuario_sistema")]
+    [AllowAnonymous]
     public async Task<IActionResult> ObtenerUsuariosConAsignaciones()
     {
+
         var resultado = await _context.Usuarios
             .Select(usuario => new DispositivoAsignadoDTO
             {

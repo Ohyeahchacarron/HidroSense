@@ -55,7 +55,7 @@ public class UsuariosController : ControllerBase
             Pais = dto.Pais,
             Correo = dto.Correo,
             Telefono = dto.Telefono,
-            Nivel = "1"
+            Nivel = dto.Nivel
         };
 
         usuario.EstablecerPassword(dto.Contrasenia);
@@ -136,6 +136,7 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpPut("editar/{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> EditarUsuario(int id, [FromBody] UsuarioEdicionDTO dto)
     {
         var usuario = await _context.Usuarios.FindAsync(id);
@@ -187,6 +188,7 @@ public class UsuariosController : ControllerBase
 
 
     [HttpDelete("eliminar/{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> EliminarUsuario(int id)
     {
         var usuario = await _context.Usuarios.FindAsync(id);

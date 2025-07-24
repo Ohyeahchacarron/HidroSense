@@ -1,5 +1,6 @@
 ﻿namespace HidroSense.Models;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class SistemaPurificacion
 {
@@ -16,6 +17,9 @@ public class SistemaPurificacion
     public double Precio { get; set; }
 
     public string UrlImagen { get; set; }
+
+    [ForeignKey("IdUsuario")]
+    public int IdUsuario { get; set; }
 }
 
 

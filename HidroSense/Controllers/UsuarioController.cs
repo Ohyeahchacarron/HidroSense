@@ -185,4 +185,36 @@ public class UsuariosController : ControllerBase
 
         return Ok(new { success = true, message = "Usuario eliminado.", data = (object)null });
     }
+
+    [HttpGet("usuario_sistema")]
+    public async Task<IActionResult> ObtenerUsuariosConAsignaciones()
+    {
+        var resultado = await _context.Usuarios
+            .Select(usuario => new DispositivoAsignadoDTO
+            {
+                NombreCompleto = usuario.Nombre + " " + usuario.ApellidoPaterno + " " + usuario.ApellidoMaterno,
+                Nivel = usuario.Nivel,
+                NombreFuente = usuario.Nivel == "2"
+                    ? null
+                    : _context.FuentesAgua
+                        .Where(f => f.IdUsuario == usuario.IdUsuario)
+                        .Select(f => f.NombreFuente)
+                        .FirstOrDefault(),
+                NombreSistema = usuario.Nivel == "2"
+                    ? null
+                    : _context.SistemasPurificacion
+                        .Where(s => s.IdUsuario == usuario.IdUsuario)
+                        .Select(s => s.NombreSistema)
+                        .FirstOrDefault()
+            })
+            .ToListAsync();
+
+        return Ok(new
+        {
+            success = true,
+            message = "Usuarios con sus asignaciones",
+            data = resultado
+        });
+    }
+
 }

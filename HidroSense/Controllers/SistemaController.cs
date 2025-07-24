@@ -72,6 +72,29 @@ namespace HidroSense.Controllers
                 data = sistema
             });
         }
+        [HttpGet("comentarios")]
+        public async Task<IActionResult> ObtenerComentarios()
+        {
+            var comentarios = await _context.Comentarios
+                .Include(c => c.Usuario)
+                .Select(c => new ComentarioDTO
+                {
+                    NombreUsuario = c.Usuario.Nombre + " " + c.Usuario.ApellidoPaterno + " " + c.Usuario.ApellidoMaterno,
+                    NombreSistema = _context.SistemasPurificacion
+                        .Where(s => s.IdUsuario == c.IdUsuario)
+                        .Select(s => s.NombreSistema)
+                        .FirstOrDefault(),
+                    Comentario = c.ComentarioTexto
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Lista de comentarios",
+                data = comentarios
+            });
+        }
 
     }
 }

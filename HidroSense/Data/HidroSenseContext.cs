@@ -16,5 +16,6 @@ public class HidroSenseContext : DbContext
     public DbSet<Alerta> Alertas { get; set; }
     public DbSet<ComponentesSistema> ComponentesSistema { get; set; }
     public DbSet<Proveedor> Proveedores { get; set; }
+    public DbSet<Comentario> Comentarios { get; set; }
 }
 

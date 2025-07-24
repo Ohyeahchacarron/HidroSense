@@ -4,6 +4,7 @@ using HidroSense.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HidroSense.Migrations
 {
     [DbContext(typeof(HidroSenseContext))]
-    partial class HidroSenseContextModelSnapshot : ModelSnapshot
+    [Migration("20250723030934_ProductosUsuarios")]
+    partial class ProductosUsuarios
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,32 +89,6 @@ namespace HidroSense.Migrations
                     b.HasIndex("IdFuente");
 
                     b.ToTable("Alertas");
-                });
-
-            modelBuilder.Entity("HidroSense.Models.Comentario", b =>
-                {
-                    b.Property<int>("IdComentario")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdComentario"));
-
-                    b.Property<string>("ComentarioTexto")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("IdUsuario")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Respuesta")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("IdComentario");
-
-                    b.HasIndex("IdUsuario");
-
-                    b.ToTable("Comentarios");
                 });
 
             modelBuilder.Entity("HidroSense.Models.FuenteAgua", b =>
@@ -318,17 +295,6 @@ namespace HidroSense.Migrations
                         .IsRequired();
 
                     b.Navigation("FuenteAgua");
-                });
-
-            modelBuilder.Entity("HidroSense.Models.Comentario", b =>
-                {
-                    b.HasOne("Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("IdUsuario")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("HidroSense.Models.FuenteAgua", b =>

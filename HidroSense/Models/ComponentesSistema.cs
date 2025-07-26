@@ -14,9 +14,9 @@ public class ComponentesSistema
 
     public string NombreComponente { get; set; }
     public string Descripcion { get; set; }
-    public double Precio { get; set; }
+    public decimal Precio { get; set; }
     public int Cantidad { get; set; }
     [ForeignKey("Proveedor")]
     public int IdProveedor { get; set; }
     public Proveedor Proveedor { get; set; }
-}
+    }

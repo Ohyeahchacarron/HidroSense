@@ -1,4 +1,4 @@
-﻿using System;
+﻿using HidroSense.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Cryptography;
 using System.Text;
@@ -34,6 +34,8 @@ public class Usuario
     [Required]
     [RegularExpression("[1-3]")]
     public string Nivel { get; set; }
+
+    public ICollection<UsuarioSistema> UsuarioSistemas { get; set; }
 
     public void EstablecerPassword(string password)
     {

@@ -5,25 +5,25 @@
 namespace HidroSense.Migrations
 {
     /// <inheritdoc />
-    public partial class ProductosUsuarios : Migration
+    public partial class ventas : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "IdUsuario",
-                table: "SistemasPurificacion",
-                type: "int",
+            migrationBuilder.AddColumn<decimal>(
+                name: "Total",
+                table: "DetallesVentas",
+                type: "decimal(18,2)",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0m);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "IdUsuario",
-                table: "SistemasPurificacion");
+                name: "Total",
+                table: "DetallesVentas");
         }
     }
 }

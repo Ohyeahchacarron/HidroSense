@@ -5,7 +5,7 @@ namespace HidroSense.DTOs
     public class SistemaDisponibilidadDTO
     {
         public string NombreSistema { get; set; }
-        public int CantidadDisponible { get; set; } // del modelo SistemaPurificacion
+        public int CantidadDisponible { get; set; } 
 
         public List<ComponenteRequeridoDTO> Componentes { get; set; }
     }
@@ -13,7 +13,7 @@ namespace HidroSense.DTOs
     public class ComponenteRequeridoDTO
     {
         public string NombreComponente { get; set; }
-        public int CantidadRequerida { get; set; } // del modelo SistemaRequerimiento
-        public int CantidadDisponible { get; set; } // del modelo ComponentesSistema
+        public int CantidadRequerida { get; set; }
+        public int CantidadDisponible { get; set; }
     }
 }

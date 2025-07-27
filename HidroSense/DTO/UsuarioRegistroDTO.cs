@@ -8,4 +8,5 @@
     public string Correo { get; set; }
     public string Contrasenia { get; set; }
     public string Telefono { get; set; }
+    public string Nivel { get; set; }
 }

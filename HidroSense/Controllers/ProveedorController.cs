@@ -9,7 +9,7 @@ namespace HidroSense.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     public class ProveedorController : ControllerBase
     {
         private readonly HidroSenseContext _context;
@@ -86,10 +86,9 @@ namespace HidroSense.Controllers
 
             int cantidadTotal = cantidadAnterior + dto.CantidadAdquirida;
 
-            // Calcular nuevo precio promedio
+            
             decimal nuevoPrecio = ((precioAnterior * cantidadAnterior) + (dto.PrecioAdquisicion * dto.CantidadAdquirida)) / cantidadTotal;
 
-            // Actualizar valores
             componente.Cantidad = cantidadTotal;
             componente.Precio = nuevoPrecio;
 

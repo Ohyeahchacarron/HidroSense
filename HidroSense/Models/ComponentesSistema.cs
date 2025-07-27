@@ -6,12 +6,6 @@ public class ComponentesSistema
 {
     [Key]
     public int IdComponente { get; set; }
-
-    [ForeignKey("SistemaPurificacion")]
-    public int IdSistema { get; set; }
-
-    public SistemaPurificacion SistemaPurificacion { get; set; }
-
     public string NombreComponente { get; set; }
     public string Descripcion { get; set; }
     public decimal Precio { get; set; }

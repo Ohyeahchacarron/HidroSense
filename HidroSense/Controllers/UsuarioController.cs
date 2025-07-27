@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-[Authorize]
+//[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class UsuariosController : ControllerBase
@@ -21,6 +21,16 @@ public class UsuariosController : ControllerBase
     {
         _context = context;
         _config = config;
+    }
+
+    [HttpGet("getUsuarios")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<Usuario>>> getUsuarios()
+    {
+
+        var usuarios = await _context.Usuarios.ToListAsync();
+
+        return Ok(usuarios);
     }
 
     [AllowAnonymous]
@@ -42,7 +52,7 @@ public class UsuariosController : ControllerBase
             Pais = dto.Pais,
             Correo = dto.Correo,
             Telefono = dto.Telefono,
-            Nivel = "1"
+            Nivel = dto.Nivel
         };
 
         usuario.EstablecerPassword(dto.Contrasenia);
@@ -99,7 +109,6 @@ public class UsuariosController : ControllerBase
             }
         });
     }
-
     private string GenerarJwt(Usuario usuario)
     {
         var claims = new[]
@@ -202,9 +211,12 @@ public class UsuariosController : ControllerBase
                         .FirstOrDefault(),
                 NombreSistema = usuario.Nivel == "2"
                     ? null
-                    : _context.SistemasPurificacion
-                        .Where(s => s.IdUsuario == usuario.IdUsuario)
-                        .Select(s => s.NombreSistema)
+                    : _context.UsuarioSistemas
+                        .Where(us => us.IdUsuario == usuario.IdUsuario)
+                        .Join(_context.SistemasPurificacion,
+                            us => us.IdSistema,
+                            s => s.IdSistema,
+                            (us, s) => s.NombreSistema)
                         .FirstOrDefault()
             })
             .ToListAsync();
@@ -216,5 +228,6 @@ public class UsuariosController : ControllerBase
             data = resultado
         });
     }
+
 
 }

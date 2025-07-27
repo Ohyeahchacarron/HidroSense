@@ -23,5 +23,6 @@ namespace HidroSense.Models
         public int Cantidad { get; set; }
 
         public string? Nota { get; set; }
+        public decimal Total { get; set; }
     }
 }

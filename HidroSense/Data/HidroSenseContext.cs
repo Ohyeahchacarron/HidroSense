@@ -19,6 +19,8 @@ public class HidroSenseContext : DbContext
     public DbSet<Venta> Ventas { get; set; }
     public DbSet<DetalleVenta> DetallesVentas { get; set; }
     public DbSet<SistemaRequerimiento> SistemaRequerimientos { get; set; }
+    public DbSet<UsuarioSistema> UsuarioSistemas { get; set; }
+    public DbSet<Cotizacion> Cotizaciones { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

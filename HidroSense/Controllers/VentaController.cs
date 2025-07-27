@@ -9,7 +9,7 @@ namespace HidroSense.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class VentaController : ControllerBase
     {
         private readonly HidroSenseContext _context;
@@ -18,12 +18,34 @@ namespace HidroSense.Controllers
         {
             _context = context;
         }
-
-        [HttpPost("registrar")]
+        [HttpPost("venta")]
         public async Task<IActionResult> RegistrarVenta([FromBody] GenerarVentaDTO dto)
         {
             try
             {
+                // Verificación previa de stock
+                foreach (var detalleDto in dto.Detalles)
+                {
+                    if (detalleDto.IdComponente.HasValue)
+                    {
+                        var componente = await _context.ComponentesSistema.FindAsync(detalleDto.IdComponente.Value);
+                        if (componente == null)
+                            return NotFound(new { success = false, message = "Componente no encontrado" });
+
+                        if (componente.Cantidad < detalleDto.Cantidad)
+                            return BadRequest(new { success = false, message = $"Stock insuficiente del componente con ID {detalleDto.IdComponente}" });
+                    }
+                    else if (detalleDto.IdSistema.HasValue)
+                    {
+                        var sistema = await _context.SistemasPurificacion.FindAsync(detalleDto.IdSistema.Value);
+                        if (sistema == null)
+                            return NotFound(new { success = false, message = "Sistema no encontrado" });
+
+                        if (sistema.Cantidad < detalleDto.Cantidad)
+                            return BadRequest(new { success = false, message = $"Stock insuficiente del sistema con ID {detalleDto.IdSistema}" });
+                    }
+                }
+
                 var venta = new Venta
                 {
                     IdCliente = dto.IdCliente,
@@ -34,14 +56,45 @@ namespace HidroSense.Controllers
 
                 foreach (var detalleDto in dto.Detalles)
                 {
-                    var detalle = new DetalleVenta
+                    decimal costoBase = 0;
+
+                    if (detalleDto.IdComponente.HasValue)
                     {
-                        IdSistema = detalleDto.IdSistema,
+                        var componente = await _context.ComponentesSistema.FindAsync(detalleDto.IdComponente.Value);
+
+                        costoBase = componente.Precio;
+                        componente.Cantidad -= detalleDto.Cantidad;
+                    }
+                    else if (detalleDto.IdSistema.HasValue)
+                    {
+                        var sistema = await _context.SistemasPurificacion.FindAsync(detalleDto.IdSistema.Value);
+
+                        // Calcular el costo basado en sus componentes
+                        var requerimientos = await _context.SistemaRequerimientos
+                            .Where(sr => sr.IdSistema == sistema.IdSistema)
+                            .Include(sr => sr.ComponentesSistema)
+                            .ToListAsync();
+
+                        foreach (var req in requerimientos)
+                        {
+                            costoBase += req.ComponentesSistema.Precio * req.CantidadRequerida;
+                        }
+
+                        sistema.Cantidad -= detalleDto.Cantidad;
+
+                        // Ya no se descuentan componentes
+                    }
+
+                    decimal total = Math.Round(costoBase * detalleDto.Cantidad * 1.3M, 2);
+
+                    venta.Detalles.Add(new DetalleVenta
+                    {
                         IdComponente = detalleDto.IdComponente,
+                        IdSistema = detalleDto.IdSistema,
                         Cantidad = detalleDto.Cantidad,
-                        Nota = detalleDto.Nota
-                    };
-                    venta.Detalles.Add(detalle);
+                        Nota = detalleDto.Nota,
+                        Total = total
+                    });
                 }
 
                 _context.Ventas.Add(venta);
@@ -64,5 +117,6 @@ namespace HidroSense.Controllers
                 });
             }
         }
+
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HidroSense.Migrations
 {
     [DbContext(typeof(HidroSenseContext))]
-    [Migration("20250727025233_Cotizacion")]
-    partial class Cotizacion
+    [Migration("20250728054322_Comentarios")]
+    partial class Comentarios
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -102,7 +102,6 @@ namespace HidroSense.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Respuesta")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdComentario");

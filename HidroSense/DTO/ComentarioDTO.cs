@@ -6,4 +6,10 @@
         public string NombreSistema { get; set; }
         public string Comentario { get; set; }
     }
+
+    public class ReviewDTO
+    {
+        public string ComentarioTexto { get; set; }
+        public int IdUsuario { get; set; }
+    }
 }

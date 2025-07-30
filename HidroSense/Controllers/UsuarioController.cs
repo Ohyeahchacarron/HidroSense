@@ -105,7 +105,8 @@ public class UsuariosController : ControllerBase
                 usuario.Pais,
                 usuario.Correo,
                 Contrasenia = dto.Contrasenia,
-                usuario.Telefono
+                usuario.Telefono,
+                usuario.Nivel
             }
         });
     }

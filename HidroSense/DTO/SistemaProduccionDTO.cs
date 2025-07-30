@@ -1,7 +1,9 @@
 ﻿namespace HidroSense.DTO
 {
     public class SistemaProduccionDTO
+
     {
+        public int IdSistema { get; set; }
         public string NombreSistema { get; set; }
         public int SistemasDisponibles { get; set; }
         public List<ComponenteSimpleDTO> Componentes { get; set; }

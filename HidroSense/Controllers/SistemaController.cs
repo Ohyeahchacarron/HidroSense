@@ -174,6 +174,7 @@ namespace HidroSense.Controllers
 
                 resultado.Add(new SistemaProduccionDTO
                 {
+                    IdSistema= sistema.IdSistema,
                     NombreSistema = sistema.NombreSistema,
                     SistemasDisponibles = sistema.Cantidad,
                     Componentes = componentesDTO,
@@ -188,6 +189,75 @@ namespace HidroSense.Controllers
                 data = resultado
             });
         }
+
+        [HttpPut("producir/{idSistema}")]
+        public async Task<IActionResult> ProducirSistema(int idSistema)
+        {
+            var requerimientos = await _context.SistemaRequerimientos
+                .Where(r => r.IdSistema == idSistema)
+                .Include(r => r.ComponentesSistema)
+                .ToListAsync();
+
+            if (requerimientos == null || !requerimientos.Any())
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "No se encontraron requerimientos para este sistema",
+                    data = (object)null
+                });
+            }
+
+            foreach (var req in requerimientos)
+            {
+                var componente = req.ComponentesSistema;
+                if (componente == null)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = $"El componente con ID {req.IdComponente} no existe",
+                        data = (object)null
+                    });
+                }
+
+                if (componente.Cantidad <= 0 || componente.Cantidad < req.CantidadRequerida)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = $"No hay componentes suficientes para {componente.NombreComponente}",
+                        data = (object)null
+                    });
+                }
+            }
+
+            foreach (var req in requerimientos)
+            {
+                req.ComponentesSistema.Cantidad -= req.CantidadRequerida;
+            }
+
+            var sistema = await _context.SistemasPurificacion.FindAsync(idSistema);
+            if (sistema != null)
+            {
+                sistema.Cantidad += 1;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Producción realizada con éxito. Componentes descontados y sistema actualizado.",
+                data = requerimientos.Select(r => new
+                {
+                    r.IdComponente,
+                    r.ComponentesSistema.NombreComponente,
+                    r.CantidadRequerida
+                })
+            });
+        }
+
 
         [HttpGet("inventario")]
         public async Task<IActionResult> ObtenerInventarioComponentes()

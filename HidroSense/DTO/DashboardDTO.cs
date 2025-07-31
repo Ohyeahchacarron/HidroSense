@@ -5,7 +5,7 @@
         public class ProductoPorMesDTO
         {
             public string Producto { get; set; }
-            public int CantidadVendida { get; set; }
+            public decimal CantidadVendida { get; set; }
         }
 
         public class VentasPorVendedorDTO

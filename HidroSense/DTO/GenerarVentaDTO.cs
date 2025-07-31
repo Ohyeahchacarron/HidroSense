@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace HidroSense.DTOs
 {
@@ -13,12 +14,12 @@ namespace HidroSense.DTOs
 
     public class GenerarVentaDTO
     {
-       
-            public int IdCliente { get; set; }
-            public int IdVendedor { get; set; }
-            public DateTime FechaHora { get; set; }
-            public List<DetalleVentaDTO> Detalles { get; set; }
-        }
+        public int IdCliente { get; set; }
+        public int IdVendedor { get; set; }
 
-   
+        [JsonPropertyName("fechaVenta")] 
+        public DateTime FechaHora { get; set; }
+
+        public List<DetalleVentaDTO> Detalles { get; set; }
+    }
 }

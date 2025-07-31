@@ -18,6 +18,36 @@ namespace HidroSense.Controllers
         {
             _context = context;
         }
+
+        [HttpGet("clientes")] 
+        public async Task<IActionResult> GetClientes()
+        {
+            var clientes = await _context.Usuarios
+                .Where(u => u.Nivel == "2") 
+                .Select(u => new { u.IdUsuario, u.Nombre, u.ApellidoPaterno, u.ApellidoMaterno, u.Correo })
+                .ToListAsync();
+
+            return Ok(new { success = true, message = "Clientes obtenidos", data = clientes });
+        }
+
+        // En un controlador existente (ej. ProductoController o VentaController)
+        [HttpGet("productos-venta")]
+        public async Task<IActionResult> GetProductosParaVenta()
+        {
+            var sistemas = await _context.SistemasPurificacion
+                .Select(s => new { Id = s.IdSistema, Nombre = s.NombreSistema, Tipo = "sistema", CantidadDisponible = s.Cantidad })
+                .ToListAsync();
+
+            var componentes = await _context.ComponentesSistema
+                .Select(c => new { Id = c.IdComponente, Nombre = c.NombreComponente, Tipo = "componente", CantidadDisponible = c.Cantidad })
+                .ToListAsync();
+
+            var productos = new List<object>();
+            productos.AddRange(sistemas);
+            productos.AddRange(componentes);
+
+            return Ok(new { success = true, message = "Productos para venta obtenidos", data = productos });
+        }
         [HttpPost("venta")]
         public async Task<IActionResult> RegistrarVenta([FromBody] GenerarVentaDTO dto)
         {
@@ -69,7 +99,6 @@ namespace HidroSense.Controllers
                     {
                         var sistema = await _context.SistemasPurificacion.FindAsync(detalleDto.IdSistema.Value);
 
-                        // Calcular el costo basado en sus componentes
                         var requerimientos = await _context.SistemaRequerimientos
                             .Where(sr => sr.IdSistema == sistema.IdSistema)
                             .Include(sr => sr.ComponentesSistema)

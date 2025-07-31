@@ -1,8 +1,10 @@
-﻿using HidroSense.Data;
+﻿
+using HidroSense.Data;
 using HidroSense.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static HidroSense.DTOs.DashboardDTO;
+using System.Linq; 
 
 namespace HidroSense.Controllers
 {
@@ -25,15 +27,15 @@ namespace HidroSense.Controllers
                 .Select(d => new
                 {
                     Nombre = d.IdSistema != null ? d.SistemaPurificacion.NombreSistema :
-                             d.IdComponente != null ? d.ComponentesSistema.NombreComponente :
-                             "Sin nombre",
-                    d.Cantidad
+                                 d.IdComponente != null ? d.ComponentesSistema.NombreComponente :
+                                 "Sin nombre",
+                    TotalVenta = d.Total 
                 })
                 .GroupBy(x => x.Nombre)
                 .Select(g => new ProductoPorMesDTO
                 {
                     Producto = g.Key,
-                    CantidadVendida = g.Sum(x => x.Cantidad)
+                    CantidadVendida = g.Sum(x => x.TotalVenta) 
                 })
                 .ToListAsync();
 
@@ -72,15 +74,23 @@ namespace HidroSense.Controllers
                     d.Total
                 }))
                 .GroupBy(x => x.Mes)
-                .Select(g => new VentasPorMesDTO
+                .Select(g => new
                 {
-                    Mes = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(g.Key),
+                    MesNumero = g.Key,
                     TotalVentas = g.Sum(x => x.Total)
                 })
-                .OrderBy(x => DateTime.ParseExact(x.Mes, "MMMM", null).Month)
                 .ToListAsync();
 
-            return Ok(new { success = true, message = "OK", data = ventas });
+            var ventasFinal = ventas
+                .Select(x => new VentasPorMesDTO
+                {
+                    Mes = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(x.MesNumero),
+                    TotalVentas = x.TotalVentas
+                })
+                .OrderBy(x => DateTime.ParseExact(x.Mes, "MMMM", System.Globalization.CultureInfo.CurrentCulture).Month)
+                .ToList();
+
+            return Ok(new { success = true, message = "OK", data = ventasFinal });
         }
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HidroSense.Migrations
 {
     [DbContext(typeof(HidroSenseContext))]
-    [Migration("20250726223652_ventas")]
-    partial class ventas
+    [Migration("20250728054322_Comentarios")]
+    partial class Comentarios
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -102,7 +102,6 @@ namespace HidroSense.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Respuesta")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdComentario");
@@ -110,6 +109,31 @@ namespace HidroSense.Migrations
                     b.HasIndex("IdUsuario");
 
                     b.ToTable("Comentarios");
+                });
+
+            modelBuilder.Entity("HidroSense.Models.Cotizacion", b =>
+                {
+                    b.Property<int>("IdCotizacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCotizacion"));
+
+                    b.Property<string>("CorreoElectronico")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NombreContacto")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SituacionDetallada")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdCotizacion");
+
+                    b.ToTable("Cotizaciones");
                 });
 
             modelBuilder.Entity("HidroSense.Models.DetalleVenta", b =>

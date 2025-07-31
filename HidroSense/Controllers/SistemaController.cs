@@ -1,6 +1,7 @@
 ﻿using HidroSense.Data;
 using HidroSense.DTO;
 using HidroSense.DTOs;
+using HidroSense.Migrations;
 using HidroSense.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -100,6 +101,45 @@ namespace HidroSense.Controllers
             });
         }
 
+        [HttpPost("agregar-comentario")]
+        public async Task<IActionResult> AgregarComentario([FromBody] ReviewDTO dto)
+        {
+            var usuario = await _context.Usuarios.FindAsync(dto.IdUsuario);
+            if (usuario == null)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Usuario no encontrado",
+                    data = (object)null
+                });
+            }
+
+            var nuevoComentario = new Comentario
+            {
+                ComentarioTexto = dto.ComentarioTexto,
+                IdUsuario = dto.IdUsuario,
+                Respuesta = null
+            };
+
+            _context.Comentarios.Add(nuevoComentario);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Comentario agregado exitosamente",
+                data = new
+                {
+                    nuevoComentario.IdComentario,
+                    nuevoComentario.ComentarioTexto,
+                    nuevoComentario.Respuesta,
+                    nuevoComentario.IdUsuario
+                }
+            });
+
+        }
+
         [HttpGet("sistemas-produccion")]
         public async Task<IActionResult> ObtenerSistemasConComponentes()
         {
@@ -168,6 +208,7 @@ namespace HidroSense.Controllers
                 data = componentes
             });
         }
+
 
     }
 }

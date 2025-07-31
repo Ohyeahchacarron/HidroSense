@@ -8,12 +8,10 @@ namespace HidroSense.Models
         [Key]
         public int IdComentario { get; set; }
 
-        [Required]
         public string ComentarioTexto { get; set; }
 
-        public string Respuesta { get; set; }
+        public string? Respuesta { get; set; }
 
-        [Required]
         public int IdUsuario { get; set; }
 
         [ForeignKey("IdUsuario")]

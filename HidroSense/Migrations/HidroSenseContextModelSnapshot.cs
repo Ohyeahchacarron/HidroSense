@@ -99,7 +99,6 @@ namespace HidroSense.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Respuesta")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdComentario");

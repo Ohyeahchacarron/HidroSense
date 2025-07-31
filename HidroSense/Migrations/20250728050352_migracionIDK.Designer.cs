@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HidroSense.Migrations
 {
     [DbContext(typeof(HidroSenseContext))]
-    [Migration("20250727025233_Cotizacion")]
-    partial class Cotizacion
+    [Migration("20250728050352_migracionIDK")]
+    partial class migracionIDK
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

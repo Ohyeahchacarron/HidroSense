@@ -24,7 +24,6 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpGet("getUsuarios")]
-    [AllowAnonymous]
     public async Task<ActionResult<List<Usuario>>> getUsuarios()
     {
 

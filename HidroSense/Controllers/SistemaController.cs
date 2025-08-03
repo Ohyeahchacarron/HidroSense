@@ -118,7 +118,7 @@ namespace HidroSense.Controllers
             {
                 ComentarioTexto = dto.ComentarioTexto,
                 IdUsuario = dto.IdUsuario,
-                Respuesta = null
+             
             };
 
             _context.Comentarios.Add(nuevoComentario);
@@ -132,7 +132,6 @@ namespace HidroSense.Controllers
                 {
                     nuevoComentario.IdComentario,
                     nuevoComentario.ComentarioTexto,
-                    nuevoComentario.Respuesta,
                     nuevoComentario.IdUsuario
                 }
             });

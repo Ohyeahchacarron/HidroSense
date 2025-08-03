@@ -98,9 +98,6 @@ namespace HidroSense.Migrations
                     b.Property<int>("IdUsuario")
                         .HasColumnType("int");
 
-                    b.Property<string>("Respuesta")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("IdComentario");
 
                     b.HasIndex("IdUsuario");

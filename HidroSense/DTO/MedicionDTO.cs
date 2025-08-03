@@ -1,8 +1,11 @@
-﻿namespace HidroSense.DTOs;
-
-public class MedicionDTO
+﻿namespace HidroSense.DTOs
 {
-    public float? Ph { get; set; }
-    public float? NivelTurbidez { get; set; }
-    public float? Temperatura { get; set; }
+    public class MedicionDTO
+    {
+        public string NombreSistema { get; set; }
+        public string NombreFuente { get; set; }
+        public float? Ph { get; set; }
+        public float?  Turbidez { get; set; }
+        public float? Temperatura { get; set; }
+    }
 }

@@ -9,7 +9,7 @@ namespace HidroSense.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class VentaController : ControllerBase
     {
         private readonly HidroSenseContext _context;
@@ -30,7 +30,6 @@ namespace HidroSense.Controllers
             return Ok(new { success = true, message = "Clientes obtenidos", data = clientes });
         }
 
-        // En un controlador existente (ej. ProductoController o VentaController)
         [HttpGet("productos-venta")]
         public async Task<IActionResult> GetProductosParaVenta()
         {
@@ -53,7 +52,6 @@ namespace HidroSense.Controllers
         {
             try
             {
-                // Verificación previa de stock
                 foreach (var detalleDto in dto.Detalles)
                 {
                     if (detalleDto.IdComponente.HasValue)
@@ -111,7 +109,6 @@ namespace HidroSense.Controllers
 
                         sistema.Cantidad -= detalleDto.Cantidad;
 
-                        // Ya no se descuentan componentes
                     }
 
                     decimal total = Math.Round(costoBase * detalleDto.Cantidad * 1.3M, 2);

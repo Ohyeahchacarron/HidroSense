@@ -8,12 +8,6 @@ public class FuenteAgua
     public int IdFuente { get; set; }
 
     [Required]
-    public int IdUsuario { get; set; }
-
-    [ForeignKey("IdUsuario")]
-    public Usuario Usuario { get; set; }
-
-    [Required]
     public string NombreFuente { get; set; }
 
     public string TipoFuente { get; set; }

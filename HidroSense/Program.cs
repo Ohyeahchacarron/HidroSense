@@ -33,11 +33,10 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Configurar Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ✅ CONFIGURAR CORS
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",

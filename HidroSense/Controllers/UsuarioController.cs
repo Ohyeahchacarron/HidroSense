@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-//[Authorize]
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class UsuariosController : ControllerBase
@@ -195,40 +195,5 @@ public class UsuariosController : ControllerBase
 
         return Ok(new { success = true, message = "Usuario eliminado.", data = (object)null });
     }
-
-    [HttpGet("usuario_sistema")]
-    public async Task<IActionResult> ObtenerUsuariosConAsignaciones()
-    {
-        var resultado = await _context.Usuarios
-            .Select(usuario => new DispositivoAsignadoDTO
-            {
-                NombreCompleto = usuario.Nombre + " " + usuario.ApellidoPaterno + " " + usuario.ApellidoMaterno,
-                Nivel = usuario.Nivel,
-                NombreFuente = usuario.Nivel == "2"
-                    ? null
-                    : _context.FuentesAgua
-                        .Where(f => f.IdUsuario == usuario.IdUsuario)
-                        .Select(f => f.NombreFuente)
-                        .FirstOrDefault(),
-                NombreSistema = usuario.Nivel == "2"
-                    ? null
-                    : _context.UsuarioSistemas
-                        .Where(us => us.IdUsuario == usuario.IdUsuario)
-                        .Join(_context.SistemasPurificacion,
-                            us => us.IdSistema,
-                            s => s.IdSistema,
-                            (us, s) => s.NombreSistema)
-                        .FirstOrDefault()
-            })
-            .ToListAsync();
-
-        return Ok(new
-        {
-            success = true,
-            message = "Usuarios con sus asignaciones",
-            data = resultado
-        });
-    }
-
 
 }

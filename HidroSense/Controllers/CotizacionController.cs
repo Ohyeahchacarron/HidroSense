@@ -10,7 +10,7 @@ using System;
 namespace HidroSense.Controllers
 {
     [ApiController]
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     public class CotizacionController : ControllerBase
     {

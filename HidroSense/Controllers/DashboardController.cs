@@ -4,11 +4,13 @@ using HidroSense.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static HidroSense.DTOs.DashboardDTO;
-using System.Linq; 
+using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HidroSense.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class DashboardController : ControllerBase
     {

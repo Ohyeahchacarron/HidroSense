@@ -1,7 +1,6 @@
 ﻿using HidroSense.Data;
 using HidroSense.DTO;
 using HidroSense.DTOs;
-using HidroSense.Migrations;
 using HidroSense.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HidroSense.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class SistemaController : ControllerBase
@@ -139,7 +138,7 @@ namespace HidroSense.Controllers
             });
 
         }
-
+      
         [HttpGet("sistemas-produccion")]
         public async Task<IActionResult> ObtenerSistemasConComponentes()
         {

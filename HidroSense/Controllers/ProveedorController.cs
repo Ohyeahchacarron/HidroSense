@@ -1,6 +1,7 @@
 ﻿using HidroSense.Data;
 using HidroSense.DTO;
 using HidroSense.DTOs;
+using HidroSense.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ namespace HidroSense.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize]
     public class ProveedorController : ControllerBase
     {
         private readonly HidroSenseContext _context;
@@ -67,6 +68,53 @@ namespace HidroSense.Controllers
                 data = componentes
             });
         }
+
+        [HttpPost("registrar-proveedor")]
+        public async Task<IActionResult> RegistrarProveedorConComponentes([FromBody] ProveedorConComponentesDTO dto)
+        {
+            var proveedor = new Proveedor
+            {
+                NombreProveedor = dto.NombreProveedor,
+                NombreContacto = dto.NombreContacto
+            };
+
+            _context.Proveedores.Add(proveedor);
+            await _context.SaveChangesAsync();
+
+            var componentes = dto.Componentes.Select(c => new ComponentesSistema
+            {
+                NombreComponente = c.NombreComponente,
+                Descripcion = c.Descripcion,
+                Precio = c.Precio,
+                Cantidad = c.Cantidad,
+                IdProveedor = proveedor.IdProveedor
+            }).ToList();
+
+            _context.ComponentesSistema.AddRange(componentes);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Proveedor y componentes registrados correctamente",
+                data = new
+                {
+                    proveedor.IdProveedor,
+                    proveedor.NombreProveedor,
+                    proveedor.NombreContacto,
+                    Componentes = componentes.Select(c => new
+                    {
+                        c.IdComponente,
+                        c.NombreComponente,
+                        c.Descripcion,
+                        c.Precio,
+                        c.Cantidad
+                    })
+                }
+            });
+        }
+
+
         [HttpPut("actualizar-inventario")]
         public async Task<IActionResult> ActualizarInventario([FromBody] IngresoComponenteDTO dto)
         {

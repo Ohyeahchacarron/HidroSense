@@ -1,11 +1,15 @@
 ﻿using HidroSense.Data;
 using HidroSense.DTOs;
+using HidroSense.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-//[Authorize]
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class MedicionesController : ControllerBase
 {
@@ -46,7 +50,7 @@ public class MedicionesController : ControllerBase
             return NotFound(new { success = false, message = "Medición no encontrada", data = (object)null });
 
         medicion.Ph = dto.Ph;
-        medicion.NivelTurbidez = dto.NivelTurbidez;
+        medicion.NivelTurbidez = dto.Turbidez;
         medicion.Temperatura = dto.Temperatura;
         medicion.FechaHora = DateTime.UtcNow;
 
@@ -65,5 +69,49 @@ public class MedicionesController : ControllerBase
             }
         });
     }
+
+    [HttpGet("usuario/{idUsuario}")]
+    public async Task<IActionResult> ObtenerMedicionesPorUsuario(int idUsuario)
+    {
+        
+        var datos = await _context.Mediciones
+            .Include(m => m.UsuarioSistema) 
+                .ThenInclude(us => us.SistemaPurificacion) 
+            .Include(m => m.FuenteAgua) 
+            .Where(m => m.UsuarioSistema.IdUsuario == idUsuario) 
+            .Select(m => new
+            {
+                nombreSistema = m.UsuarioSistema.SistemaPurificacion.NombreSistema, 
+                nombreFuente = m.FuenteAgua.NombreFuente, 
+                ph = m.Ph,
+                turbidez = m.NivelTurbidez, 
+                temperatura = m.Temperatura
+            })
+            .ToListAsync();
+
+        if (datos == null || !datos.Any())
+        {
+            return Ok(new
+            {
+                success = true,
+                message = "No se encontraron lecturas para el usuario.",
+                data = new
+                {
+                    sensores = new List<object>() 
+                }
+            });
+        }
+
+        return Ok(new
+        {
+            success = true,
+            message = "Lectura obtenida",
+            data = new
+            {
+                sensores = datos
+            }
+        });
+    
+}
 
 }

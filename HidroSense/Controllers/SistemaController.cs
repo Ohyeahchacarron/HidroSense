@@ -1,7 +1,6 @@
 ﻿using HidroSense.Data;
 using HidroSense.DTO;
 using HidroSense.DTOs;
-using HidroSense.Migrations;
 using HidroSense.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HidroSense.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class SistemaController : ControllerBase
@@ -119,7 +118,7 @@ namespace HidroSense.Controllers
             {
                 ComentarioTexto = dto.ComentarioTexto,
                 IdUsuario = dto.IdUsuario,
-                Respuesta = null
+             
             };
 
             _context.Comentarios.Add(nuevoComentario);
@@ -133,13 +132,12 @@ namespace HidroSense.Controllers
                 {
                     nuevoComentario.IdComentario,
                     nuevoComentario.ComentarioTexto,
-                    nuevoComentario.Respuesta,
                     nuevoComentario.IdUsuario
                 }
             });
 
         }
-
+      
         [HttpGet("sistemas-produccion")]
         public async Task<IActionResult> ObtenerSistemasConComponentes()
         {

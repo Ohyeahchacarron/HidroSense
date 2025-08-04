@@ -6,7 +6,7 @@ namespace HidroSense.Models
     public class UsuarioSistema
     {
         [Key]
-        public int Id { get; set; }
+        public int IdUsuarioSistema { get; set; }
 
         [ForeignKey("Usuario")]
         public int IdUsuario { get; set; }

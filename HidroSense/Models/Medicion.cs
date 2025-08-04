@@ -7,12 +7,6 @@ public class Medicion
 {
     [Key]
     public int IdMedicion { get; set; }
-
-    [Required]
-    public int IdFuente { get; set; }
-
-    public FuenteAgua FuenteAgua { get; set; }
-
     public DateTime FechaHora { get; set; }
 
     public float? Ph { get; set; }
@@ -20,5 +14,14 @@ public class Medicion
     public float? NivelTurbidez { get; set; }
 
     public float? Temperatura { get; set; }
+
+    [ForeignKey ("FuenteAgua")]
+    public int IdFuente { get; set; }
+
+    public FuenteAgua FuenteAgua { get; set; }
+
+    [ForeignKey ("UsuarioSistema")]
+    public int IdUsuarioSistema { get; set; }
+    public UsuarioSistema UsuarioSistema { get; set; }
 }
 

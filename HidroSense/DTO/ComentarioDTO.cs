@@ -12,4 +12,9 @@
         public string ComentarioTexto { get; set; }
         public int IdUsuario { get; set; }
     }
+    public class ResponderComentarioDTO 
+    {
+        public int IdComentario { get; set; } 
+        public string RespuestaTexto { get; set; } 
+    }
 }

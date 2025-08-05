@@ -10,6 +10,7 @@
 
     public class ProveedorConComponentesDTO
     {
+        public int IdProveedor { get; set; }
         public string NombreProveedor { get; set; }
         public string NombreContacto { get; set; }
         public List<ComponenteDTO> Componentes { get; set; }

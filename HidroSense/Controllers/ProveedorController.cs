@@ -26,6 +26,7 @@ namespace HidroSense.Controllers
             var proveedores = await _context.Proveedores
                 .Select(p => new ProveedorConComponentesDTO
                 {
+                    IdProveedor= p.IdProveedor,
                     NombreProveedor = p.NombreProveedor,
                     NombreContacto = p.NombreContacto,
                     Componentes = _context.ComponentesSistema

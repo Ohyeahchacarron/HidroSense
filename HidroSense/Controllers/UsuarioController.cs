@@ -26,8 +26,8 @@ public class UsuariosController : ControllerBase
 
 
     [HttpGet("getUsuarios")]
-    [AllowAnonymous]
-    public async Task<ActionResult<List<Usuario>>> getUsuarios() {
+    public async Task<ActionResult<List<Usuario>>> getUsuarios()
+    {
 
         var usuarios = await _context.Usuarios.ToListAsync();
 

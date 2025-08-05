@@ -42,10 +42,17 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200") // tu frontend
+            policy.AllowAnyOrigin() // tu frontend
                   .AllowAnyHeader()
                   .AllowAnyMethod();
         });
+});
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5000); // Puerto HTTP
+    // Si quieres HTTPS también:
+    options.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps());
 });
 
 var app = builder.Build();
@@ -58,7 +65,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAngular");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

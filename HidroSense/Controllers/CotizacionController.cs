@@ -22,6 +22,7 @@ namespace HidroSense.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> CrearCotizacion([FromBody] CrearCotizacionDTO dto)
         {
             var cotizacion = new Cotizacion

@@ -74,33 +74,41 @@ namespace HidroSense.Controllers
         }
 
         [HttpGet("comentarios")]
+        [AllowAnonymous]
         public async Task<IActionResult> ObtenerComentarios()
         {
-            var comentarios = await _context.Comentarios
+
+            var comentariosUnicos = await _context.Comentarios
                 .Include(c => c.Usuario)
-                .Select(c => new ComentarioDTO
-                {
-                    NombreUsuario = c.Usuario.Nombre + " " + c.Usuario.ApellidoPaterno + " " + c.Usuario.ApellidoMaterno,
-                    NombreSistema = _context.UsuarioSistemas
-                        .Where(us => us.IdUsuario == c.IdUsuario)
-                        .Join(_context.SistemasPurificacion,
-                            us => us.IdSistema,
-                            s => s.IdSistema,
-                            (us, s) => s.NombreSistema)
-                        .FirstOrDefault(),
-                    Comentario = c.ComentarioTexto
-                })
+                .GroupBy(c => c.IdUsuario)
+                .Select(g => g.FirstOrDefault())
                 .ToListAsync();
+
+            
+            var unicoComentario = comentariosUnicos
+                .Select(nc => new ComentarioDTO
+                {
+                    NombreUsuario = nc.Usuario.Nombre + " " + nc.Usuario.ApellidoPaterno + " " + nc.Usuario.ApellidoMaterno,
+                    NombreSistema = _context.UsuarioSistemas
+                                    .Where(us => us.IdUsuario == nc.IdUsuario)
+                                    .Join(_context.SistemasPurificacion,
+                                           us => us.IdSistema,
+                                           s => s.IdSistema,
+                                           (us, s) => s.NombreSistema)
+                                    .FirstOrDefault(),
+                    Comentario = nc.ComentarioTexto
+                }).ToList();
 
             return Ok(new
             {
                 success = true,
                 message = "Lista de comentarios",
-                data = comentarios
+                data = unicoComentario
             });
         }
 
         [HttpPost("agregar-comentario")]
+        [AllowAnonymous]
         public async Task<IActionResult> AgregarComentario([FromBody] ReviewDTO dto)
         {
             var usuario = await _context.Usuarios.FindAsync(dto.IdUsuario);
